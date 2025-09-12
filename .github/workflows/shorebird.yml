@@ -1,0 +1,220 @@
+
+# this is for all workflows with the menual and seperate workflows full release or patch release
+
+#name: Shorebird Release
+#
+#on:
+#  workflow_dispatch:
+#    inputs:
+#      target:
+#        description: "Choose what to run"
+#        required: true
+#        default: "patch"
+#        type: choice
+#        options:
+#          - release-android
+#          - release-ios
+#          - patch-android
+#          - patch-ios
+#  push:
+#    branches:
+#      - main
+#
+#jobs:
+#
+#
+##---- for release full app update to shorebird
+#
+#  #---android-----
+#
+#  release-android:
+#    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'release-android'
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout to repo
+#        uses: actions/checkout@v4
+#
+#      - name: Setup flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: "3.35.2"
+#
+#      - name: install Shorebird
+#        run: :|
+#            curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
+#            echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+#      - name: check shorebird version
+#        uses: shorebird --version
+#
+#      - name: release to shortbird
+#        env:
+#          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_KEY }}  # SHOREBIRD_KEY is the name of the secret which we stored in github repo
+#        run: |
+#          shorebird release android \
+#            --release-version 1.0.${{ github.run_number }}
+#
+#
+#   #------full release for ios
+#  release-ios:
+#    if: github.event_name == 'workflow_dispatch'  && github.event.inputs.target == 'release-ios'
+#    runs-on: macos-latest
+#
+#
+#    steps:
+#      - name: Checkout to repo
+#        uses: actions/checkout@v4
+#
+#      - name: Setup flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: "3.35.2"
+#
+#      - name: install Shorebird
+#        run: :|
+#          curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
+#          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+#      - name: check shorebird version
+#        uses: shorebird --version
+#
+#      - name: release to shortbird
+#        env:
+#          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_KEY }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
+#        run: |
+#          shorebird release ios \
+#            --release-version 1.0.${{ github.run_number }}
+#
+##------ hot fix release patch update to shorebird
+#
+#  patch-android:
+#    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'patch-android') || (github.event_name == 'push' && (contains(github.event.head_commit.message, 'hotfix') || contains(github.event.head_commit.message, 'patch')))
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - name: Setup Flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: '3.35.2'
+#
+#      - name: Install Shorebird
+#        run: |
+#          curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
+#          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+#
+#      - name: Shorebird Patch Android
+#        env:
+#          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_KEY }}. # SHOREBIRD_KEY is the name of the secret which we stored in github repo
+#        run: |
+#          shorebird patch android --force
+#
+#
+#
+##-------- hot fix release patch update to shorebird for ios
+#
+#
+#  patch-ios:
+#    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'patch-ios') || (github.event_name == 'push' && (contains(github.event.head_commit.message, 'hotfix') || contains(github.event.head_commit.message, 'patch')))
+#    runs-on: macos-latest
+#
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - name: Setup Flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: '3.35.2'
+#
+#      - name: Install Shorebird
+#        run: |
+#          curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
+#          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+#
+#      - name: Shorebird Patch ios
+#        env:
+#          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_KEY }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
+#        run: |
+#          shorebird patch ios --force
+#
+
+
+
+# this is use matrix system when you need tp run multiple workflows at the same time
+
+name: Shorebird CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Choose what to run"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - release
+          - patch
+  push:
+    branches:
+      - main
+
+jobs:
+  # -------------------------------
+  # FULL RELEASE: Android + iOS
+  # -------------------------------
+  release:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'release'
+    strategy:
+      matrix:
+        platform: [android, ios]
+    runs-on: ${{ matrix.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.2'
+
+      - name: Install Shorebird CLI
+        run: |
+          curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
+          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+
+      - name: Shorebird Release (${{ matrix.platform }})
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_KEY }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
+        run: |
+          shorebird release ${{ matrix.platform }} \
+            --release-version 1.0.${{ github.run_number }}
+
+  # -------------------------------
+  # PATCH: Android + iOS
+  # -------------------------------
+  patch:
+    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'patch') ||
+      (github.event_name == 'push' && (contains(github.event.head_commit.message, 'hotfix:') || contains(github.event.head_commit.message, 'patch:')))
+    strategy:
+      matrix:
+        platform: [android, ios]
+    runs-on: ${{ matrix.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.2'
+
+      - name: Install Shorebird CLI
+        run: |
+          curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
+          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+
+      - name: Shorebird Patch (${{ matrix.platform }})
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_KEY }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
+        run: |
+          shorebird patch ${{ matrix.platform }} --force
+
+
+
