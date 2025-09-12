@@ -140,7 +140,7 @@
 
 
 
-# this is use matrix system when you need tp run multiple workflows at the same time
+# this is use matrix system when you need to run multiple workflows at the same time
 
 name: Shorebird CI
 
@@ -183,7 +183,7 @@ jobs:
 
       - name: Shorebird Release (${{ matrix.platform }})
         env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_KEY }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
         run: |
           shorebird release ${{ matrix.platform }} \
             --release-version 1.0.${{ github.run_number }}
@@ -212,7 +212,7 @@ jobs:
 
       - name: Shorebird Patch (${{ matrix.platform }})
         env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_KEY }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
         run: |
           shorebird patch ${{ matrix.platform }} --force
 
