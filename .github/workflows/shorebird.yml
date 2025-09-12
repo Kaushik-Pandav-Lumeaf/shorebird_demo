@@ -180,7 +180,7 @@ jobs:
       - name: Install Shorebird CLI
         run: |
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
-          chmod +x $HOME/.shorebird/bin/shorebird
+          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
 
       - name: Add Shorebird to PATH
         run: echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
@@ -216,7 +216,7 @@ jobs:
       - name: Install Shorebird CLI
         run: |
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
-          chmod +x $HOME/.shorebird/bin/shorebird
+          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
 
       - name: Add Shorebird to PATH
         run: echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
