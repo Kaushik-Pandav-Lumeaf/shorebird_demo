@@ -172,6 +172,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.2'
@@ -180,14 +181,26 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
           echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
-          chmod +x $HOME/.shorebird/bin/shorebird
-          
 
-      - name: verify shorebird version
-        run: shorebird --version
+      - name: Verify Shorebird Installation
+        run: |
+          echo "PATH: $PATH"
+          shorebird --version
+
+      - name: Check SHOREBIRD_TOKEN
+        run: |
+          if [ -z "$SHOREBIRD_TOKEN" ]; then
+            echo "Error: SHOREBIRD_TOKEN is not set!"
+            exit 1
+          else
+            echo "SHOREBIRD_TOKEN is set."
+          fi
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
       - name: Shorebird Release (${{ matrix.platform }})
         env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: |
           shorebird release ${{ matrix.platform }} \
             --release-version 1.0.${{ github.run_number }}
@@ -205,6 +218,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.2'
@@ -213,15 +227,25 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
           echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
-          chmod +x $HOME/.shorebird/bin/shorebird
-      - name: verify shorebird version
-        run: shorebird --version
+
+      - name: Verify Shorebird Installation
+        run: |
+          echo "PATH: $PATH"
+          shorebird --version
+
+      - name: Check SHOREBIRD_TOKEN
+        run: |
+          if [ -z "$SHOREBIRD_TOKEN" ]; then
+            echo "Error: SHOREBIRD_TOKEN is not set!"
+            exit 1
+          else
+            echo "SHOREBIRD_TOKEN is set."
+          fi
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
       - name: Shorebird Patch (${{ matrix.platform }})
         env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: |
           shorebird patch ${{ matrix.platform }} --force
-
-
-
