@@ -180,23 +180,13 @@ jobs:
       - name: Install Shorebird CLI
         run: |
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
-          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+          chmod +x $HOME/.shorebird/bin/shorebird
 
-      - name: Verify Shorebird Installation
-        run: |
-          echo "PATH: $PATH"
-          shorebird --version
+      - name: Add Shorebird to PATH
+        run: echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
 
-      - name: Check SHOREBIRD_TOKEN
-        run: |
-          if [ -z "$SHOREBIRD_TOKEN" ]; then
-            echo "Error: SHOREBIRD_TOKEN is not set!"
-            exit 1
-          else
-            echo "SHOREBIRD_TOKEN is set."
-          fi
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      - name: Verify Shorebird version
+        run: shorebird --version
 
       - name: Shorebird Release (${{ matrix.platform }})
         env:
@@ -226,23 +216,13 @@ jobs:
       - name: Install Shorebird CLI
         run: |
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
-          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+          chmod +x $HOME/.shorebird/bin/shorebird
 
-      - name: Verify Shorebird Installation
-        run: |
-          echo "PATH: $PATH"
-          shorebird --version
+      - name: Add Shorebird to PATH
+        run: echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
 
-      - name: Check SHOREBIRD_TOKEN
-        run: |
-          if [ -z "$SHOREBIRD_TOKEN" ]; then
-            echo "Error: SHOREBIRD_TOKEN is not set!"
-            exit 1
-          else
-            echo "SHOREBIRD_TOKEN is set."
-          fi
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      - name: Verify Shorebird version
+        run: shorebird --version
 
       - name: Shorebird Patch (${{ matrix.platform }})
         env:
