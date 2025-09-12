@@ -180,7 +180,11 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
           echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+          chmod +x $HOME/.shorebird/bin/shorebird
+          
 
+      - name: verify shorebird version
+        run: shorebird --version
       - name: Shorebird Release (${{ matrix.platform }})
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }} # SHOREBIRD_KEY is the name of the secret which we stored in github repo
@@ -209,6 +213,9 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
           echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+          chmod +x $HOME/.shorebird/bin/shorebird
+      - name: verify shorebird version
+        run: shorebird --version
 
       - name: Shorebird Patch (${{ matrix.platform }})
         env:
