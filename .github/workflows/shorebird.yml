@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Shorebird
-        uses: actions/setup-shorebird@v1
+        uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
           shorebird-version: latest
