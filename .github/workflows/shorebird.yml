@@ -24,6 +24,7 @@ jobs:
     strategy:
       matrix:
         platform: [ android, ios ]
+      fail-fast: false
     runs-on: ${{ matrix.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
 
     steps:
@@ -38,10 +39,10 @@ jobs:
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
           echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
 
-      - name: Verify Shorebird version
+      - name: Verify Shorebird CLI
         run: shorebird --version
 
-      - name: Shorebird login
+      - name: Shorebird Login
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: shorebird login --api-key $SHOREBIRD_TOKEN
@@ -60,6 +61,7 @@ jobs:
     strategy:
       matrix:
         platform: [ android, ios ]
+      fail-fast: false
     runs-on: ${{ matrix.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
 
     steps:
@@ -74,14 +76,14 @@ jobs:
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
           echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
 
-      - name: Verify Shorebird version
+      - name: Verify Shorebird CLI
         run: shorebird --version
 
-      - name: Shorebird login
+      - name: Shorebird Login
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: shorebird login --api-key $SHOREBIRD_TOKEN
 
       - name: Shorebird Patch (${{ matrix.platform }})
         run: |
-          shorebird patch ${{ matrix.platform }}
+          shorebird patch ${{ matrix.platform }} --release-version 1.0.${{ github.run_number }}
