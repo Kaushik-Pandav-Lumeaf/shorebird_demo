@@ -27,9 +27,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '11'
+
+      - name: Verify Shorebird Login
+        run: shorebird whoami || (echo " Shorebird login failed. Check SHOREBIRD_TOKEN" && exit 1)
 
       - name: 🚀 Shorebird Release
         uses: shorebirdtech/shorebird-release@v0
         with:
           platform: android
+          release-version: 1.0.${{ github.run_number }}
