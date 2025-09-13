@@ -8,11 +8,12 @@ env:
 
 jobs:
   release:
-    defaults:
-      run:
-        shell: bash
+    strategy:
+      matrix:
+        platform : [android,ios]
+      fail-fast: false
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
 
     steps:
       - name: 📚 Git Checkout
@@ -30,8 +31,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🚀 Shorebird Release
+      - name: 🚀 Shorebird Release  (${{ matrix.platform }})
         uses: shorebirdtech/shorebird-release@v0
         with:
-          platform: android
+          platform: ${{ matrix.platform }}
           release-version: 1.0.${{ github.run_number }}
