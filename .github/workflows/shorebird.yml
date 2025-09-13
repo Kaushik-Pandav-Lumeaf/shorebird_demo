@@ -29,8 +29,11 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Verify Shorebird Login
-        run: shorebird whoami || (echo " Shorebird login failed. Check SHOREBIRD_TOKEN" && exit 1)
+      - name: Shorebird Login
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        run: shorebird login:ci --api-key $SHOREBIRD_TOKEN
+
 
       - name: 🚀 Shorebird Release
         uses: shorebirdtech/shorebird-release@v0
