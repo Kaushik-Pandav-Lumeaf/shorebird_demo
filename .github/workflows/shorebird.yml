@@ -32,8 +32,6 @@ jobs:
 
       - name: Shorebird Login (CI)
         run: shorebird login:ci --token $SHOREBIRD_TOKEN
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 
 
