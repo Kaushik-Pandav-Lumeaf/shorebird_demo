@@ -30,7 +30,7 @@ class HomePage extends StatelessWidget {
                 },
                 child: Text("restart app"),
               ),
-              Text("first patch with shorebird ci"),
+              Text("first patch with shorebird ci cd"),
               Image.asset("assets/select 1.png"),
               Text("patch version :${ShorebirdHelper.instance.currentAppVersion}"),
             ],
