@@ -29,10 +29,12 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Shorebird Login
+      - name: Shorebird Login (CI)
+        run: |
+          echo "$SHOREBIRD_TOKEN" | shorebird login:ci
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: shorebird login:ci --api-key $SHOREBIRD_TOKEN
+
 
 
       - name: 🚀 Shorebird Release
