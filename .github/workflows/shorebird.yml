@@ -32,6 +32,7 @@ jobs:
           java-version: '17'
 
       - name: 🚀 Shorebird Release  (${{ matrix.platform }})
+        if: env.ACT != true
         uses: shorebirdtech/shorebird-release@v0
         with:
           platform: ${{ matrix.platform }}
