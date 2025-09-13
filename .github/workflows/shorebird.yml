@@ -1,4 +1,4 @@
-name: Shorebird Release
+name: Shorebird Android Release
 
 on:
   workflow_dispatch:
@@ -8,12 +8,11 @@ env:
 
 jobs:
   release:
-    strategy:
-      matrix:
-        platform : [android,ios]
-      fail-fast: false
+    defaults:
+      run:
+        shell: bash
 
-    runs-on: ${{ matrix.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: 📚 Git Checkout
@@ -31,9 +30,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🚀 Shorebird Release  (${{ matrix.platform }})
-        if: env.ACT != true
+      - name: 🚀 Shorebird Release
+        if: env.ACT != 'true'
         uses: shorebirdtech/shorebird-release@v0
         with:
-          platform: ${{ matrix.platform }}
+          platform: android
           release-version: 1.0.${{ github.run_number }}
+
+
+      - name: 📝 Output Release Version
+        run: echo ${{ steps.shorebird-release.outputs.release-version }}
