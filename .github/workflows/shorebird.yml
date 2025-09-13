@@ -1,81 +1,35 @@
-name: Shorebird Android CI
+name: Shorebird Release
 
 on:
   workflow_dispatch:
-    inputs:
-      target:
-        description: "Choose what to run"
-        required: true
-        default: "patch"
-        type: choice
-        options:
-          - release
-          - patch
-  push:
-    branches:
-      - main
+
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
-  android:
+  release:
+    defaults:
+      run:
+        shell: bash
+
     runs-on: ubuntu-latest
+
     steps:
-      # Checkout repo
-      - uses: actions/checkout@v4
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v3
 
-      # Flutter setup
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.35.3'
-
-      # Java setup (required for Android Gradle builds)
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-
-      # Shorebird CLI setup
-      - name: 🐦 Setup Shorebird CLI
+      - name: 🐦 Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
 
-      - name: Add Shorebird to PATH
-        run: echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Verify Shorebird CLI
-        run: shorebird --version
-
-      # Shorebird login
-      - name: Shorebird Login
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: |
-          shorebird login --api-key $SHOREBIRD_TOKEN
-          shorebird whoami
-
-      # Set dynamic version
-      - name: Set release/patch version
-        id: version
-        run: echo "VERSION=1.0.${{ github.run_number }}" >> $GITHUB_ENV
-
-      # Conditional release or patch
-      - name: Release or Patch
-        run: |
-          echo "Target: ${{ github.event.inputs.target }}"
-          echo "Version: $VERSION"
-
-          if [[ "${{ github.event.inputs.target }}" == "release" ]]; then
-            echo "Performing release for Android..."
-            shorebird release android --release-version $VERSION
-          else
-            echo "Checking if release $VERSION exists..."
-            if shorebird releases | grep -q "$VERSION"; then
-              echo "Release exists, performing patch..."
-              shorebird patch android --release-version $VERSION
-            else
-              echo "Release $VERSION does not exist, creating release first..."
-              shorebird release android --release-version $VERSION
-              echo "Applying patch..."
-              shorebird patch android --release-version $VERSION
-            fi
-          fi
+      - name: 🚀 Shorebird Release
+        uses: shorebirdtech/shorebird-release@v0
+        with:
+          platform: android
