@@ -2,12 +2,22 @@ name: Shorebird Android Release
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: "Choose what to run"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - release
+          - patch
 
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
   release:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'release'
     defaults:
       run:
         shell: bash
@@ -15,14 +25,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📚 Git Checkout
+      - name:  Git Checkout
         uses: actions/checkout@v3
 
-      - name: 🐦 Setup Shorebird
+      - name:  Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
-          shorebird-version: latest
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -30,7 +39,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🚀 Shorebird Release
+      - name: Shorebird Release
         if: env.ACT != 'true'
         uses: shorebirdtech/shorebird-release@v0
         with:
@@ -40,3 +49,42 @@ jobs:
 
       - name: 📝 Output Release Version
         run: echo ${{ steps.shorebird-release.outputs.release-version }}
+
+
+
+  patch:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'patch'
+    defaults:
+      run:
+        shell: bash
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Github checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Shorebird
+        uses: actions/setup-shorebird@v1
+        with:
+          cache: true
+          shorebird-version: latest
+
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Shorebird Patch
+        if: env.ACT != 'true'
+        id: shorebird-patch
+        uses: shorebirdtech/shorebird-patch@v0
+        with:
+          platform: android
+          release-version: 1.0.${{ github.run_number }}
+
+
+      - name: Output Patch Version
+        run: echo ${{ steps.shorebird-patch.outputs.patch-number }}
