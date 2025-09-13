@@ -30,7 +30,7 @@ jobs:
           java-version: '11'
 
       - name: Shorebird Login (CI)
-        run: shorebird login:ci --token $SHOREBIRD_TOKEN
+        run: shorebird login:ci
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
