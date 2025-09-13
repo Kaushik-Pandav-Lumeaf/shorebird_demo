@@ -30,11 +30,6 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Shorebird Login (CI)
-        run: shorebird login:ci --token $SHOREBIRD_TOKEN
-
-
-
       - name: 🚀 Shorebird Release
         uses: shorebirdtech/shorebird-release@v0
         with:
