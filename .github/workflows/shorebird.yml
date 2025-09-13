@@ -23,7 +23,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'release'
     strategy:
       matrix:
-        platform: [ android, ios ]
+        platform: [android, ios]
       fail-fast: false
     runs-on: ${{ matrix.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
 
@@ -34,23 +34,27 @@ jobs:
         with:
           flutter-version: '3.35.3'
 
-      - name: Install Shorebird CLI
+      # Install Shorebird CLI, set PATH, verify
+      - name: Install and verify Shorebird CLI
         run: |
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
-          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.shorebird/bin:$PATH"
+          shorebird --version
 
-      - name: Verify Shorebird CLI
-        run: shorebird --version
-
+      # Shorebird login
       - name: Shorebird Login
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: shorebird login --api-key $SHOREBIRD_TOKEN
+        run: |
+          shorebird login --api-key $SHOREBIRD_TOKEN
+          shorebird whoami
 
+      # Release step
       - name: Shorebird Release (${{ matrix.platform }})
         run: |
-          shorebird release ${{ matrix.platform }} \
-            --release-version 1.0.${{ github.run_number }}
+          RELEASE_VERSION="1.0.${{ github.run_number }}"
+          echo "Releasing version $RELEASE_VERSION"
+          shorebird release ${{ matrix.platform }} --release-version $RELEASE_VERSION
 
   # -------------------------------
   # PATCH: Android + iOS
@@ -60,7 +64,7 @@ jobs:
       (github.event_name == 'push' && (contains(github.event.head_commit.message, 'hotfix:') || contains(github.event.head_commit.message, 'patch:')))
     strategy:
       matrix:
-        platform: [ android, ios ]
+        platform: [android, ios]
       fail-fast: false
     runs-on: ${{ matrix.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
 
@@ -71,19 +75,31 @@ jobs:
         with:
           flutter-version: '3.35.3'
 
-      - name: Install Shorebird CLI
+      # Install Shorebird CLI, set PATH, verify
+      - name: Install and verify Shorebird CLI
         run: |
           curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
-          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.shorebird/bin:$PATH"
+          shorebird --version
 
-      - name: Verify Shorebird CLI
-        run: shorebird --version
-
+      # Shorebird login
       - name: Shorebird Login
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: shorebird login --api-key $SHOREBIRD_TOKEN
+        run: |
+          shorebird login --api-key $SHOREBIRD_TOKEN
+          shorebird whoami
 
+      # Debug environment (optional, can remove after confirmation)
+      - name: Debug environment
+        run: |
+          echo "PATH: $PATH"
+          which shorebird
+          shorebird --version
+
+      # Patch step
       - name: Shorebird Patch (${{ matrix.platform }})
         run: |
-          shorebird patch ${{ matrix.platform }} --release-version 1.0.${{ github.run_number }}
+          PATCH_VERSION="1.0.${{ github.run_number }}"
+          echo "Patching version $PATCH_VERSION"
+          shorebird patch ${{ matrix.platform }} --release-version $PATCH_VERSION
