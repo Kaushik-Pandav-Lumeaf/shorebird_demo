@@ -1,4 +1,4 @@
-name: Shorebird CI
+name: Shorebird Android CI
 
 on:
   workflow_dispatch:
@@ -14,79 +14,27 @@ on:
   push:
     branches:
       - main
-env:
-  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
 jobs:
-  # -------------------------------
-  # FULL RELEASE: Android + iOS
-  # -------------------------------
-  release:
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'release'
-    strategy:
-      matrix:
-        platform: [ android, ios ]
-    runs-on: ${{ matrix.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
-
+  android:
+    runs-on: ubuntu-latest
     steps:
+      # Checkout repo
       - uses: actions/checkout@v4
 
+      # Flutter setup
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.3'
 
-      - if: matrix.platform == 'android'
-        uses: actions/setup-java@v4
-        with:
-            distribution: 'temurin'
-            java-version: '11'
-
-
-      - name: 🐦 Setup Shorebird
-        uses: shorebirdtech/setup-shorebird@v1
-        with:
-          cache: true
-
-      - name: Add Shorebird to PATH
-        run: echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
-
-      - name: Verify Shorebird version
-        run: shorebird --version
-
-      - name: Shorebird login
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: shorebird login --api-key $SHOREBIRD_TOKEN
-
-      - name: Shorebird Release (${{ matrix.platform }})
-        run: |
-          shorebird release ${{ matrix.platform }} \
-            --release-version 1.0.${{ github.run_number }}
-
-  # -------------------------------
-  # PATCH: Android + iOS
-  # -------------------------------
-  patch:
-    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'patch') ||
-      (github.event_name == 'push' && (contains(github.event.head_commit.message, 'hotfix:') || contains(github.event.head_commit.message, 'patch:')))
-    strategy:
-      matrix:
-        platform: [ android, ios ]
-    runs-on: ${{ matrix.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.35.3'
-
-      - if: matrix.platform == 'android'
-        uses: actions/setup-java@v4
+      # Java setup for Android
+      - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: 🐦 Setup Shorebird
+      # Shorebird setup
+      - name: 🐦 Setup Shorebird CLI
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
@@ -94,14 +42,25 @@ jobs:
       - name: Add Shorebird to PATH
         run: echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
 
-      - name: Verify Shorebird version
+      - name: Verify Shorebird CLI
         run: shorebird --version
 
-      - name: Shorebird login
+      # Shorebird login
+      - name: Shorebird Login
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: shorebird login --api-key $SHOREBIRD_TOKEN
-
-      - name: Shorebird Patch (${{ matrix.platform }})
         run: |
-          shorebird patch ${{ matrix.platform }}
+          shorebird login --api-key $SHOREBIRD_TOKEN
+          shorebird whoami
+
+      # Conditional release or patch
+      - name: Shorebird Android Update
+        run: |
+          VERSION="1.0.${{ github.run_number }}"
+          if [[ "${{ github.event.inputs.target }}" == "release" ]]; then
+            echo "Performing release version $VERSION"
+            shorebird release android --release-version $VERSION
+          else
+            echo "Performing patch for release version $VERSION"
+            shorebird patch android --release-version $VERSION
+          fi
